@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+	<mapper namespace="com.choongang.gb2023501.EduMaterialsMapper">
+		<select id="ybEduList" parameterType="EduMaterials" resultType="EduMaterials">			
+			SELECT *
+			FROM
+			(
+					SELECT rownum rn, a.*
+					FROM
+								(SELECT *
+								 FROM Edu_Materials) a
+			)
+			WHERE   rn BETWEEN #{start} and #{end}		
+		</select>
+		
+		<select id="ybEduListCnt" parameterType="EduMaterials" resultType="int">
+			SELECT count(*) FROM Edu_Materials
+		</select>
+		
+		<select id="findSaleTotal" parameterType="map" resultType="int">
+			SELECT 
+			sum(go_payment)
+			FROM Game_order 
+			WHERE go_order_date BETWEEN #{s_date} and #{e_date}
+		</select>
+		
+		<select id="selectGameList" resultType="Game">
+			SELECT *
+			FROM   GAME
+		</select>
+		
+		<insert id="ybInsertLgJoin" parameterType="map">
+			INSERT INTO lg_join (lg_num, m_num, lgj_joinDate, lgj_approval) values (#{lg_num}, #{m_num}, sysdate, 0)
+		</insert>
+		
+		
+		<select id="selectListCnt" parameterType="map" resultType="int">
+			SELECT count(*) 
+			FROM   game_order
+			WHERE  go_order_date BETWEEN #{s_date} AND #{e_date}
+		</select>
+		
+		<select id="selectMNameList" parameterType="LearnGrp" resultType="LearnGrp">
+			SELECT 	 DISTINCT m.m_name, m.m_num
+			FROM   	 member m, learn_grp lg
+			WHERE  	 m.m_num = lg.m_num
+			ORDER BY m.m_name
+		</select>
+	</mapper>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.choongang.gb2023501.NewFileMapper"> 
+	<select id="dhGameOrderList" resultType="Game" parameterType="Game">
+		SELECT 	a.*
+		FROM   (SELECT rownum rn, g.*
+				FROM  (select *
+					   from game g
+					   where g_dele_status = 0
+				       <if test="keyword != null and keyword != ''">
+			 	       and   g_title like '%' || #{keyword} || '%'
+			 	       </if>
+				       ORDER BY g_regi_date desc) g
+				) a
+		WHERE rn BETWEEN #{start} AND #{end}
+		
+		
+	</select>
+	
+	<select id="dhGameOrderSearchTotal" resultType="int" parameterType="Game">
+		SELECT count(*)
+		FROM   game
+		where  g_dele_status = 0
+		<if test="keyword != null and keyword != ''">
+		and  g_title like '%' || #{keyword} || '%'
+		</if>
+		
+	</select>
+	
+	<!-- 구독신청 -->
+	<select id="dhGameOrderSelect" parameterType="java.util.Map" resultType="Game">
+  		SELECT 	*
+  		FROM	game
+   		WHERE	g_num in
+   		<foreach collection="g_num" item="g_num"
+   		open="(" separator="," close=")">
+   		#{g_num}
+   		</foreach>	
+   </select>
+   
+   <select id="dhGameSum" parameterType="java.util.Map" resultType="int">
+  		SELECT sum(g_sell_price)
+		FROM game 
+		WHERE g_num IN
+		<foreach collection="g_num" item="g_num"
+   		open="(" separator="," close=")">
+   		#{g_num}
+   		</foreach>	
+   </select>
+	
+	<!-- <insert id="dhGameOrderInsert" parameterType="java.util.Map" >
+   		INSERT ALL
+   		<foreach collection="gamelist" item="game" separator=" ">
+   			INTO game_order(go_num,g_num,m_num,go_order_type,go_payment,go_depositor,go_order_date)
+   			VALUES(game_order_seq.nextval,#{game.g_num},#{game.m_num},#{gameOrder.go_order_type},#{game.g_sell_price},#{gameOrder.go_depositor},sysdate)
+   		</foreach>
+   		SELECT * FROM DUAL
+   </insert> -->
+   <insert id="dhGameOrderInsert" parameterType="java.util.Map" >
+   		<foreach collection="gamelist" item="game" separator=";" open="DECLARE BEGIN" close="; END;">
+   			INSERT INTO game_order(
+   					 go_num
+   					,g_num
+   					,m_num
+   					,go_order_type
+   					,go_payment
+   					,go_depositor
+   					,go_order_date
+   								  )
+   			SELECT	   game_order_seq.nextval
+   					,#{game.g_num}
+   					,#{gameOrder.m_num}
+   					,#{gameOrder.go_order_type}
+   					,#{game.g_sell_price}
+   					,#{gameOrder.go_depositor}
+   					,sysdate
+   			FROM DUAL		
+   		</foreach>
+   </insert>
+	
+	<select id="dhGameOrderList2" resultType="Game" parameterType="Game">
+	SELECT *
+	FROM (   
+    		SELECT rownum rn, a.*
+    		FROM 
+    			(select g.*, l.lg_title , go.go_order_date
+            	 from   game g, 
+                        (SELECT g_num, LISTAGG(lg_title,', ')WITHIN GROUP(ORDER BY lg_title) as lg_title
+                         FROM learn_grp
+                         GROUP BY g_num) l , game_order go
+            	 where  g.g_num = l.g_num(+)
+            	 and	g.g_num = go.g_num
+            	 and    go.m_num = ${m_num}
+            	 <if test="keyword != null and keyword != ''">
+			 	 and 	g_title like '%' || #{keyword} || '%'
+			 	 </if>
+			    ORDER BY go_order_date desc) a
+		 )
+	WHERE rn BETWEEN #{start} and #{end}
+	</select>
+	
+	<select id="dhGameOrderSearchTotal2" resultType="int" parameterType="Game">
+		SELECT count(*)
+		FROM   game g, (SELECT g_num, LISTAGG(lg_title,',')WITHIN GROUP(ORDER BY lg_title) as lg_title
+                         FROM learn_grp
+                         GROUP BY g_num) l , game_order go
+		where  g.g_num = l.g_num(+)
+        and	   g.g_num = go.g_num
+        and    go.m_num = ${m_num}
+		<if test="keyword != null and keyword != ''">
+		and    g_title like '%' || #{keyword} || '%'
+		</if>
+	</select>
+	
+	<select id="dhGameList" resultType="Game" parameterType="Game">
+		SELECT 	a.*
+		FROM(SELECT rownum rn, g.*
+			 FROM(select *
+			      from   game g
+					<if test="keyword != null and keyword != ''">
+			 	  where g_title like '%' || #{keyword} || '%'
+			 		</if>
+			 		<if test="g_dele_status != null and g_dele_status != ''">
+			 	  and g_dele_status = #{g_dele_status}
+			 		</if>
+				 ORDER BY g_regi_date desc ) g
+			)a	 
+		WHERE rn BETWEEN #{start} AND #{end}
+		
+	</select>
+	
+	<select id="dhGameSearchTotal" resultType="int" parameterType="Game">
+		SELECT count(*)
+		FROM   game
+		<if test="keyword != null and keyword != ''">
+		WHERE  g_title like '%' || #{keyword} || '%'
+		</if>
+		<if test="g_dele_status != null and g_dele_status != ''">
+		AND    g_dele_status = #{g_dele_status}
+		</if>
+	</select>
+	
+	<insert id="dhGameInsert" parameterType="Game">
+   		INSERT INTO game(g_num ,m_num, g_title, g_step, g_period, g_to, g_price, discount, g_sell_price, g_content, g_attach_name, g_attach_path,g_dele_status,g_regi_date)
+   		VALUES   (game_seq.nextval,#{m_num},#{g_title},#{g_step},#{g_period},#{g_to},#{g_price},#{discount},#{g_sell_price},#{g_content},#{g_attach_name},#{g_attach_path},#{g_dele_status}, sysdate)
+   </insert>
+	<!-- g_attach_name, g_attach_path,#{g_attach_name},#{g_attach_path}, -->
+	
+	<select id="dhGameSelect" resultType="Game" parameterType="Game">
+   		SELECT 	*
+  		FROM	game
+   		WHERE	g_num = #{g_num}
+   		AND     m_num = #{m_num}	
+   </select>
+   
+   <update id="updateGame2" parameterType="Game">
+   		UPDATE 	game	
+   		SET		g_title = #{g_title}, g_step = #{g_step}, g_period = #{g_period}, g_to = #{g_to}, g_price = #{g_price}, g_content = #{g_content},g_attach_name = #{g_attach_name}, g_dele_status = #{g_dele_status}, g_modi_date = sysdate
+   		WHERE	g_num = #{g_num}
+   		AND     m_num = #{m_num}	
+   </update>
+    <!-- g_attach_name = #{g_attach_name}, g_attach_path = #{g_attach_path} -->
+   <select id="gameImageRead" parameterType="int" resultType="Game">
+		select *
+		from game
+		where g_num = #{g_num}
+	</select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config
+3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias alias="Member" 			type="com.choongang.gb2023501.model.Member"/>
+		<typeAlias alias="LearnGrp" 		type="com.choongang.gb2023501.model.LearnGrp"/>
+		<typeAlias alias="LgJoin" 			type="com.choongang.gb2023501.model.LgJoin"/>
+		<typeAlias alias="Board" 			type="com.choongang.gb2023501.model.Board"/>
+		<typeAlias alias="BoardComment" 	type="com.choongang.gb2023501.model.BoardComment"/>
+		<typeAlias alias="EduMaterials" 	type="com.choongang.gb2023501.model.EduMaterials"/>
+		<typeAlias alias="Homework" 		type="com.choongang.gb2023501.model.Homework"/>
+		<typeAlias alias="HwSend" 			type="com.choongang.gb2023501.model.HwSend"/>
+		<typeAlias alias="HwRecord" 		type="com.choongang.gb2023501.model.HwRecord"/>
+		<typeAlias alias="Game" 			type="com.choongang.gb2023501.model.Game"/>
+		<typeAlias alias="GameOrder" 		type="com.choongang.gb2023501.model.GameOrder"/>
+	</typeAliases>
+</configuration>

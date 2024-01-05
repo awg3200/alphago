@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+	<mapper namespace="com.choongang.gb2023501.EduMaterialsMapper">
+		<select id="ybEduList" parameterType="EduMaterials" resultType="EduMaterials">			
+			SELECT *
+			FROM
+			(
+					SELECT rownum rn, a.*
+					FROM
+								(SELECT *
+								 FROM Edu_Materials) a
+			)
+			WHERE   rn BETWEEN #{start} and #{end}		
+		</select>
+		
+		<select id="ybEduListCnt" parameterType="EduMaterials" resultType="int">
+			SELECT count(*) FROM Edu_Materials
+		</select>
+	</mapper>
